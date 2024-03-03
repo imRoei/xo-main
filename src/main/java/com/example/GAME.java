@@ -49,8 +49,8 @@ public class GAME {
         // gui1.refreshGrid();
         // gui2.refreshGrid();
         try {
-            sock1.send(new GameElements("refreshGrid " + x + " " + y + " " + value));
-            sock2.send(new GameElements("refreshGrid " + x + " " + y + " " + value));
+            sock1.send(new GameElements("refreshGrid", String.valueOf(x), String.valueOf(y), String.valueOf(value)));
+            sock2.send(new GameElements("refreshGrid", String.valueOf(x), String.valueOf(y), String.valueOf(value)));
             switchGrid(value);
         } catch (Exception e) {
             System.out.println("Error: " + e);
@@ -209,10 +209,10 @@ public class GAME {
 
     public void updateGUI() {
         try {
-            sock1.send(new GameElements("getPlayers " + player1 + " " + player2));
-            sock2.send(new GameElements("getPlayers " + player1 + " " + player2));
-            sock1.send(new GameElements("isFull true"));
-            sock2.send(new GameElements("isFull true"));
+            sock1.send(new GameElements("getPlayers", player1, player2));
+            sock2.send(new GameElements("getPlayers", player1, player2));
+            sock1.send(new GameElements("isFull", "true"));
+            sock2.send(new GameElements("isFull", "true"));
 
         } catch (Exception e) {
             System.out.println("Error: " + e);

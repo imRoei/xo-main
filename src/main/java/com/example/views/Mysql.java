@@ -1,6 +1,5 @@
 package com.example.views;
 
-import java.lang.constant.Constable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -9,7 +8,6 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 import com.example.models.BaseEntity;
-import com.example.models.Player;
 
 //Mysql connection class
 public class Mysql {

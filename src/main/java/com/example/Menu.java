@@ -63,7 +63,7 @@ public class Menu {
                 Socket gameSocket = new Socket(sockProtocol.getHost(), sockProtocol.getPort());
                 sockProtocol sock = new sockProtocol(gameSocket);
                 gui.setGame(gameSocket, sock);
-                sock.send(new GameElements(playerName.getText() + " " + gridSize));
+                sock.send(new GameElements("start", this.playerName.getText(), this.gridSize.getText()));
                 try {
                     Player player = new Player(playerName.getText());
                     ArrayList<BaseEntity> players = playersDB.selectAll();
@@ -88,75 +88,86 @@ public class Menu {
                     sock.send(new GameElements("close"));
                 });
                 new Thread(() -> {
-                    GameElements msg;
-                    try {
-                        while (true) {
-                            try {
-                                msg = sock.res();
-                            } catch (Exception e) {
-                                break;
+                    Player player = playersDB.selectByUsername(playerName.getText());
+                    Stats stats = playerStatsDB.selectByPlayerId(player.getId());
+
+                    while (true) {
+                        GameElements elements = sock.res();
+                        String Topic = elements.getTopic();
+
+                        Platform.runLater(() -> {
+                            if (Topic.equals("PlayerNum")) {
+                                gui.setValue(Integer.parseInt(elements.getPlayerNumber()));
                             }
-                            String[] msgArr = msg.getArgs();
-                            Platform.runLater(() -> {
-                                // UI update code
-                                if (msgArr[0].equals("1") || msgArr[0].equals("2")) {
-                                    gui.setValue(Integer.parseInt(msgArr[0]));
-                                } else if (msgArr[0].equals("refreshGrid")) {
-                                    gui.updateGrid(Integer.parseInt(msgArr[1]), Integer.parseInt(msgArr[2]),
-                                            Integer.parseInt(msgArr[3]));
-                                } else if (msgArr[0].equals("enableGrid")) {
-                                    gui.enableGrid();
-                                } else if (msgArr[0].equals("disableGrid")) {
-                                    gui.disableGrid();
-                                } else if (msgArr[0].equals("win")) {
-                                    try {
-                                        Player player = playersDB.selectByUsername(playerName.getText());
-                                        Stats stats = playerStatsDB.selectByPlayerId(player.getId());
-                                        gui.win(stats, playerName.getText());
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                } else if (msgArr[0].equals("lose")) {
-                                    try {
-                                        Player player = playersDB.selectByUsername(playerName.getText());
-                                        Stats stats = playerStatsDB.selectByPlayerId(player.getId());
-                                        gui.lose(stats, playerName.getText());
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                } else if (msgArr[0].equals("draw")) {
-                                    try {
-                                        Player player = playersDB.selectByUsername(playerName.getText());
-                                        Stats stats = playerStatsDB.selectByPlayerId(player.getId());
-                                        gui.draw(stats, playerName.getText());
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                } else if (msgArr[0].equals("refresh")) {
-                                    gui.refresh();
-                                } else if (msgArr[0].equals("createGrid")) {
-                                    gui.createGrid();
-                                } else if (msgArr[0].equals("getPlayers")) {
-                                    gui.setPlayer1(msgArr[1]);
-                                    gui.setPlayer2(msgArr[2]);
-                                    gui.updatePlayerNames();
-                                } else if (msgArr[0].equals("isFull")) {
-                                    gui.setIsFull(msgArr[1]);
-                                    gui.playersJoined();
-                                } else if (msgArr[0].equals("close")) {
-                                    sock.close();
-                                    try {
-                                        this.playerStatsDB.close();
-                                        this.playersDB.close();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+
+                            else if (Topic.equals("refreshGrid")) {
+                                gui.updateGrid(Integer.parseInt(elements.getX()), Integer.parseInt(elements.getY()),
+                                        Integer.parseInt(elements.getValue()));
+                            }
+
+                            else if (Topic.equals("enableGrid")) {
+                                gui.enableGrid();
+                            }
+
+                            else if (Topic.equals("disableGrid")) {
+                                gui.disableGrid();
+                            }
+
+                            else if (Topic.equals("win")) {
+                                try {
+                                    gui.win(stats, playerName.getText());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
-                            });
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error: " + e);
+                            }
+
+                            else if (Topic.equals("lose")) {
+                                try {
+                                    gui.lose(stats, playerName.getText());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            else if (Topic.equals("draw")) {
+                                try {
+                                    gui.draw(stats, playerName.getText());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            else if (Topic.equals("refresh")) {
+                                gui.refresh();
+                            }
+
+                            else if (Topic.equals("createGrid")) {
+                                gui.createGrid();
+                            }
+
+                            else if (Topic.equals("getPlayers")) {
+                                gui.setPlayer1(elements.getPlayer1Name());
+                                gui.setPlayer2(elements.getPlayer2Name());
+                                gui.updatePlayerNames();
+                            }
+
+                            else if (Topic.equals("isFull")) {
+                                gui.setIsFull(elements.getIsfull());
+                                gui.playersJoined();
+                            }
+
+                            else if (Topic.equals("close")) {
+                                sock.close();
+                                try {
+                                    this.playerStatsDB.close();
+                                    this.playersDB.close();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
                     }
+
                 }).start();
             }
         } catch (IOException e) {

@@ -27,7 +27,7 @@ public class sockProtocol {
         }
     }
 
-    public GameElements res() throws Exception {
+    public GameElements res() {
         try {
             int length = this.in.readInt(); // Read the length of the byte array
             byte[] bytes = new byte[length];
@@ -36,7 +36,8 @@ public class sockProtocol {
             ObjectInputStream objectStream = new ObjectInputStream(byteStream);
             return (GameElements) objectStream.readObject();
         } catch (Exception e) {
-            throw e;
+            System.out.println(e);
+            return null;
         }
     }
 

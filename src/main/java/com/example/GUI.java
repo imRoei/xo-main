@@ -100,7 +100,7 @@ public class GUI implements Initializable, gameInterface {
                         int x = GridPane.getColumnIndex(button);
                         int y = GridPane.getRowIndex(button);
                         try {
-                            sock.send(new GameElements(String.format("changeGrid %d %d %d", x, y, value)));
+                            sock.send(new GameElements("changeGrid",String.valueOf(x),String.valueOf(y),String.valueOf(value)));                        
                         } catch (Exception e) {
                             System.out.println("Error: " + e);
                         }
