@@ -66,10 +66,10 @@ public class Menu {
                 sock.send(new GameElements(playerName.getText() + " " + gridSize));
                 try {
                     Player player = new Player(playerName.getText());
-                    ArrayList<Player> players = playersDB.selectAll();
+                    ArrayList<BaseEntity> players = playersDB.selectAll();
                     boolean exists = false;
-                    for (Player p : players) {
-                        if (p.getUsername().equals(playerName.getText())) {
+                    for (BaseEntity p : players) {
+                        if (((Player) p).getUsername().equals(playerName.getText())) {
                             exists = true;
                             break;
                         }

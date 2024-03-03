@@ -1,60 +1,79 @@
 package com.example.views;
 
 import java.util.ArrayList;
+
+import com.example.models.BaseEntity;
 import com.example.models.Stats;
 
 public class PlayerStatsDB extends Mysql {
 
-    public PlayerStatsDB() throws Exception {
-        super("jdbc:mysql://localhost:3306/javaxo", "root", "1234qwer$");
+    @Override
+    public ArrayList<BaseEntity> select() {
+        ArrayList<BaseEntity> stats = new ArrayList<BaseEntity>();
+        try {
+            this.result = this.statement.executeQuery();
+            while (result.next()) {
+                Stats stat = new Stats();
+                create(stat);
+                stats.add(stat);
+            }
+
+            return stats;
+        }
+
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
-    private void createStats(Stats stats) {
+    // create the new stats if he does not exist
+    @Override
+    public void create(BaseEntity stats) {
         try {
-            stats.setId(this.result.getInt("playerId"));
-            stats.setWins(this.result.getInt("wins"));
-            stats.setLosses(this.result.getInt("losses"));
-            stats.setDraws(this.result.getInt("draws"));
-        } catch (Exception e) {
+            ((Stats) stats).setId(this.result.getInt("playerId"));
+            ((Stats) stats).setWins(this.result.getInt("wins"));
+            ((Stats) stats).setLosses(this.result.getInt("losses"));
+            ((Stats) stats).setDraws(this.result.getInt("draws"));
+        }
+
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public ArrayList<Stats> selectAll() {
-        ArrayList<Stats> allStats = new ArrayList<Stats>();
+    // select all the players
+    public ArrayList<BaseEntity> selectAll() {
         try {
             this.statement = this.connection.prepareStatement("SELECT * FROM playerStats");
-            this.select();
-            while (result.next()) {
-                Stats stats = new Stats();
-                createStats(stats);
-                allStats.add(stats);
-            }
-            return allStats;
-        } catch (Exception e) {
+            ArrayList<BaseEntity> stats = this.select();
+            return stats;
+        }
+
+        catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
+    // Get Stats by playerID
     public Stats selectByPlayerId(int id) {
         try {
             this.statement = this.connection.prepareStatement("SELECT * FROM playerStats WHERE playerId = ?");
             this.statement.setInt(1, id);
-            this.select();
-            if (result.next()) {
-                Stats stats = new Stats();
-                createStats(stats);
-                return stats;
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
+            ArrayList<BaseEntity> stats = this.select();
+
+            return ((Stats) stats.get(0));
+        }
+
+        catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
+    // insert stats into stats table by player id
     public void insert(Stats stats) {
         try {
             this.statement = this.connection
@@ -69,6 +88,7 @@ public class PlayerStatsDB extends Mysql {
         }
     }
 
+    // update stats into stats table by player id
     public void update(Stats stats) {
         try {
             this.statement = this.connection
@@ -83,6 +103,7 @@ public class PlayerStatsDB extends Mysql {
         }
     }
 
+    // delete stats from stats table by player id
     public void delete(Stats stats) {
         try {
             this.statement = this.connection.prepareStatement("DELETE FROM playerStats WHERE playerId = ?");
